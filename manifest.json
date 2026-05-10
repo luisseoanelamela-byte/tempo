@@ -1,0 +1,20 @@
+{
+  "name": "Tempo en Galicia",
+  "short_name": "Tempo Galicia",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#E1F5FE",
+  "theme_color": "#1E88E5",
+  "icons": [
+    {
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAACXBIWXMAAAsTAAALEwEAmpwYAAA... (recortado por brevedad)",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAA...",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
