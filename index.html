@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="gl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0, minimum-scale=1.0">
+  <title>Tempo en Galicia 🌦️</title>
+  
+  <!-- Esto permite instalar la app y que se vea sin barra del navegador -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#1E88E5">
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --galicia-blue: #1E88E5; --galicia-green: #43A047; --galicia-gold: #FBC02D;
+      --galicia-sky: #B3E5FC; --galicia-sea: #0288D1; --galicia-stone: #ECEFF1;
+      --white-soft: #F5F7FA; --shadow-color: rgba(0, 20, 40, 0.12);
+      --text-dark: #1E2B3C; --text-soft: #455A64; --card-bg: rgba(255, 255, 255, 0.8);
+      --glass-border: rgba(255, 255, 255, 0.55);
+    }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(165deg, #E1F5FE 0%, #B3E5FC 20%, #F1F8E9 60%, #FFF8E1 100%);
+      background-attachment: fixed; min-height: 100vh; display: flex; align-items: center;
+      justify-content: center; padding: 1rem; margin: 0; position: relative; overflow-x: hidden;
+    }
+    body::before {
+      content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-image: radial-gradient(circle at 20% 30%, rgba(255,215,0,0.08) 0%, transparent 35%),
+                        radial-gradient(circle at 80% 70%, rgba(46,125,50,0.07) 0%, transparent 40%),
+                        radial-gradient(circle at 50% 90%, rgba(30,136,229,0.09) 0%, transparent 45%);
+      pointer-events: none; z-index: 0;
+    }
+    .app-container {
+      width: 100%; max-width: 580px; background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border-radius: 2.5rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.7) inset;
+      padding: 1.8rem 1.5rem 2rem; position: relative; z-index: 2;
+      border: 1px solid rgba(255,255,255,0.6);
+    }
+    h1 {
+      font-size: 2rem; font-weight: 700; text-align: center; color: #0D3B66;
+      margin-bottom: 0.25rem; letter-spacing: -0.3px; display: flex; align-items: center;
+      justify-content: center; gap: 0.5rem; flex-wrap: wrap;
+    }
+    h1 span {
+      background: linear-gradient(135deg, #1E88E5, #43A047);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .flag-emoji { font-size: 2rem; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
+    .city-selector {
+      display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;
+      margin: 1.2rem 0 1.4rem;
+    }
+    .city-btn {
+      background: rgba(255,255,255,0.7); backdrop-filter: blur(6px);
+      border: 1.5px solid rgba(200,220,240,0.7); padding: 0.55rem 1.1rem;
+      border-radius: 2.5rem; font-weight: 600; font-size: 0.9rem; color: #1E3A5F;
+      cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .city-btn:hover {
+      background: rgba(255,255,255,0.9); border-color: #64B5F6;
+      transform: translateY(-1px); box-shadow: 0 8px 16px -6px rgba(30,136,229,0.25);
+    }
+    .city-btn.active {
+      background: #1E88E5; border-color: #1E88E5; color: white;
+      font-weight: 700; box-shadow: 0 10px 18px -8px rgba(30,136,229,0.5);
+    }
+    .weather-main {
+      background: rgba(255,255,255,0.55); border-radius: 2rem; padding: 1.6rem 1.5rem;
+      margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.7);
+      backdrop-filter: blur(12px); box-shadow: 0 12px 28px -8px rgba(0,32,64,0.12);
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .weather-main::after {
+      content: ""; position: absolute; top: -30%; right: -20%; width: 180px; height: 180px;
+      background: radial-gradient(circle, rgba(255,235,59,0.25) 0%, transparent 70%);
+      border-radius: 50%; z-index: 0;
+    }
+    .city-name { font-size: 1.6rem; font-weight: 700; color: #0B3B5E; position: relative; z-index: 1; }
+    .current-temp {
+      font-size: 4.2rem; font-weight: 800; color: #1A3B5C; line-height: 1;
+      margin: 0.3rem 0 0.1rem; position: relative; z-index: 1;
+    }
+    .weather-desc { font-size: 1.3rem; font-weight: 600; color: #2C3E50; text-transform: capitalize; position: relative; z-index: 1; }
+    .feels-like { font-size: 0.95rem; color: #546E7A; position: relative; z-index: 1; }
+    .weather-icon-main { font-size: 4rem; filter: drop-shadow(0 8px 12px rgba(0,0,0,0.15)); position: relative; z-index: 1; }
+    .details-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem;
+      margin-top: 1.2rem; position: relative; z-index: 1;
+    }
+    .detail-item {
+      background: rgba(255,255,255,0.6); border-radius: 1.2rem; padding: 0.7rem 0.3rem;
+      text-align: center; backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.8);
+    }
+    .detail-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.4px; color: #78909C; font-weight: 700; }
+    .detail-value { font-size: 1.2rem; font-weight: 700; color: #1E3B5A; }
+    .hourly-title { font-weight: 700; font-size: 1rem; color: #1E3B5A; margin-bottom: 0.7rem; display: flex; align-items: center; gap: 0.4rem; }
+    .hourly-scroll {
+      display: flex; gap: 0.7rem; overflow-x: auto; padding-bottom: 0.7rem;
+      scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin; scrollbar-color: #B0C4DE transparent;
+    }
+    .hourly-scroll::-webkit-scrollbar { height: 5px; }
+    .hourly-scroll::-webkit-scrollbar-thumb { background: #B0C4DE; border-radius: 10px; }
+    .hourly-card {
+      min-width: 70px; background: rgba(255,255,255,0.65);
+      backdrop-filter: blur(8px); border-radius: 1.2rem; padding: 0.6rem 0.5rem;
+      text-align: center; border: 1px solid rgba(255,255,255,0.7);
+      flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+    }
+    .hourly-time { font-weight: 700; font-size: 0.8rem; color: #37474F; }
+    .hourly-icon { font-size: 1.6rem; margin: 0.2rem 0; }
+    .hourly-temp { font-weight: 700; color: #1A3B5C; }
+    .loading-indicator { text-align: center; color: #546E7A; font-style: italic; }
+    footer { text-align: center; margin-top: 1rem; font-size: 0.7rem; color: #90A4AE; }
+    @media (max-width: 450px) {
+      .app-container { padding: 1.2rem 1rem; }
+      .current-temp { font-size: 3.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <h1>
+      <span class="flag-emoji">🌦️</span> Tempo en Galicia
+    </h1>
+
+    <div class="city-selector" id="citySelector">
+      <button class="city-btn active" data-city="A Coruña">🌊 A Coruña</button>
+      <button class="city-btn" data-city="Santiago">⛪ Santiago</button>
+      <button class="city-btn" data-city="Vigo">⚓ Vigo</button>
+      <button class="city-btn" data-city="Lugo">🏰 Lugo</button>
+      <button class="city-btn" data-city="Ourense">🌡️ Ourense</button>
+      <button class="city-btn" data-city="Pontevedra">🌿 Pontevedra</button>
+      <button class="city-btn" data-city="Ferrol">🚢 Ferrol</button>
+    </div>
+
+    <div class="weather-main" id="weatherMain">
+      <div class="loading-indicator">✨ Cargando tempo...</div>
+    </div>
+
+    <div style="margin-top: 0.3rem;">
+      <div class="hourly-title">⏳ Próximas horas</div>
+      <div class="hourly-scroll" id="hourlyContainer">
+        <div class="loading-indicator" style="width:100%;">Consultando previsión...</div>
+      </div>
+    </div>
+    <footer>✨ Datos de Open-Meteo · Galicia sempre verde</footer>
+  </div>
+
+  <script>
+    (function() {
+      const CITIES = {
+        "A Coruña": { lat: 43.3623, lon: -8.4115 },
+        "Santiago": { lat: 42.8806, lon: -8.5457 },
+        "Vigo": { lat: 42.2406, lon: -8.7207 },
+        "Lugo": { lat: 43.0099, lon: -7.5560 },
+        "Ourense": { lat: 42.3400, lon: -7.8644 },
+        "Pontevedra": { lat: 42.4299, lon: -8.6445 },
+        "Ferrol": { lat: 43.4832, lon: -8.2369 }
+      };
+
+      const WMO_MAP = {
+        0:  { desc: "Despexado", icon: "☀️" },
+        1:  { desc: "Maiormente despexado", icon: "🌤️" },
+        2:  { desc: "Parcialmente nubrado", icon: "⛅" },
+        3:  { desc: "Nubrado", icon: "☁️" },
+        45: { desc: "Néboa", icon: "🌫️" },
+        48: { desc: "Néboa xeada", icon: "🌫️❄️" },
+        51: { desc: "Orballo lixeiro", icon: "🌦️" },
+        53: { desc: "Orballo moderado", icon: "🌦️" },
+        55: { desc: "Orballo intenso", icon: "🌧️" },
+        61: { desc: "Chuvia feble", icon: "🌧️" },
+        63: { desc: "Chuvia moderada", icon: "🌧️" },
+        65: { desc: "Chuvia forte", icon: "🌧️⛈️" },
+        71: { desc: "Neve feble", icon: "❄️" },
+        73: { desc: "Neve moderada", icon: "❄️" },
+        75: { desc: "Neve intensa", icon: "❄️🌨️" },
+        80: { desc: "Chuvascos", icon: "🌦️" },
+        81: { desc: "Chuvascos moderados", icon: "🌧️" },
+        82: { desc: "Chuvascos fortes", icon: "⛈️" },
+        95: { desc: "Treboada", icon: "⛈️" },
+        96: { desc: "Treboada con sarabia", icon: "⛈️🧊" },
+        99: { desc: "Treboada forte", icon: "⛈️⚡" }
+      };
+
+      function getWeatherInfo(code) {
+        return WMO_MAP[code] || { desc: "Variable", icon: "🌤️" };
+      }
+
+      const weatherMainEl = document.getElementById('weatherMain');
+      const hourlyContainer = document.getElementById('hourlyContainer');
+      const cityButtons = document.querySelectorAll('.city-btn');
+      let currentCity = "A Coruña";
+
+      function setActiveCityButton(cityName) {
+        cityButtons.forEach(btn => {
+          btn.classList.toggle('active', btn.getAttribute('data-city') === cityName);
+        });
+      }
+
+      async function fetchWeather(cityName) {
+        const coords = CITIES[cityName];
+        if (!coords) return null;
+        const { lat, lon } = coords;
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,wind_speed_10m,wind_direction_10m,weather_code&hourly=temperature_2m,precipitation_probability,weather_code&timezone=Europe%2FMadrid&forecast_days=2`;
+        try {
+          const r = await fetch(url);
+          if (!r.ok) throw new Error('Erro na API');
+          return await r.json();
+        } catch (e) {
+          console.error(e);
+          return null;
+        }
+      }
+
+      function renderMainWeather(cityName, current) {
+        if (!current) {
+          weatherMainEl.innerHTML = '<div class="loading-indicator">⚠️ Non se puido cargar o tempo</div>';
+          return;
+        }
+        const w = getWeatherInfo(current.weather_code);
+        const temp = Math.round(current.temperature_2m);
+        const feels = Math.round(current.apparent_temperature);
+        const hum = current.relative_humidity_2m;
+        const wind = current.wind_speed_10m;
+        const dir = current.wind_direction_10m;
+        const precip = current.precipitation;
+        const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSO','SO','OSO','O','ONO','NO','NNO'];
+        const windText = dirs[Math.round(dir / 22.5) % 16] || '';
+
+        weatherMainEl.innerHTML = `
+          <div class="weather-icon-main">${w.icon}</div>
+          <div class="city-name">📍 ${cityName}</div>
+          <div class="current-temp">${temp}°C</div>
+          <div class="weather-desc">${w.desc}</div>
+          <div class="feels-like">Sensación térmica: ${feels}°C</div>
+          <div class="details-grid">
+            <div class="detail-item"><div class="detail-label">💧 Humidade</div><div class="detail-value">${hum}%</div></div>
+            <div class="detail-item"><div class="detail-label">🌬️ Vento</div><div class="detail-value">${wind} km/h ${windText}</div></div>
+            <div class="detail-item"><div class="detail-label">☔ Precipitación</div><div class="detail-value">${precip} mm</div></div>
+          </div>`;
+      }
+
+      function renderHourly(hourly) {
+        if (!hourly || !hourly.time || hourly.time.length === 0) {
+          hourlyContainer.innerHTML = '<div class="loading-indicator">Sen datos horarios</div>';
+          return;
+        }
+        const now = new Date();
+        const times = hourly.time;
+        const temps = hourly.temperature_2m;
+        const codes = hourly.weather_code;
+        let html = '';
+        let count = 0;
+        for (let i = 0; i < times.length; i++) {
+          const d = new Date(times[i]);
+          if (d < now) continue;
+          if (count >= 18) break;
+          const h = d.toLocaleTimeString('gl-ES', { hour:'2-digit', minute:'2-digit', hour12:false });
+          const w = getWeatherInfo(codes[i]);
+          html += `<div class="hourly-card"><div class="hourly-time">${h}</div><div class="hourly-icon">${w.icon}</div><div class="hourly-temp">${Math.round(temps[i])}°</div></div>`;
+          count++;
+        }
+        hourlyContainer.innerHTML = html || '<div class="loading-indicator">Non hai previsión horaria agora</div>';
+      }
+
+      async function updateWeather(city) {
+        weatherMainEl.innerHTML = '<div class="loading-indicator">✨ Cargando tempo...</div>';
+        hourlyContainer.innerHTML = '<div class="loading-indicator" style="width:100%;">Consultando previsión...</div>';
+        const data = await fetchWeather(city);
+        if (data) {
+          renderMainWeather(city, data.current);
+          renderHourly(data.hourly);
+        } else {
+          weatherMainEl.innerHTML = '<div class="loading-indicator">⚠️ Erro ao obter datos. Tenta de novo.</div>';
+          hourlyContainer.innerHTML = '<div class="loading-indicator">⚠️ Sen previsión</div>';
+        }
+      }
+
+      cityButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+          const city = this.getAttribute('data-city');
+          if (city === currentCity) return;
+          currentCity = city;
+          setActiveCityButton(city);
+          updateWeather(city);
+        });
+      });
+
+      updateWeather(currentCity);
+
+      // Registrar Service Worker para que funcione sin internet
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js');
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
