@@ -3,54 +3,127 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0, minimum-scale=1.0">
-  <title>Tempo en Galicia 🌦️</title>
-  
-  <!-- Esto permite instalar la app y que se vea sin barra del navegador -->
+  <title>O Tempo en Galicia 🌦️</title>
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#1E88E5">
-  
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     :root {
       --galicia-blue: #1E88E5; --galicia-green: #43A047; --galicia-gold: #FBC02D;
       --galicia-sky: #B3E5FC; --galicia-sea: #0288D1; --galicia-stone: #ECEFF1;
-      --white-soft: #F5F7FA; --shadow-color: rgba(0, 20, 40, 0.12);
-      --text-dark: #1E2B3C; --text-soft: #455A64; --card-bg: rgba(255, 255, 255, 0.8);
-      --glass-border: rgba(255, 255, 255, 0.55);
     }
+
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
-      background: linear-gradient(165deg, #E1F5FE 0%, #B3E5FC 20%, #F1F8E9 60%, #FFF8E1 100%);
-      background-attachment: fixed; min-height: 100vh; display: flex; align-items: center;
-      justify-content: center; padding: 1rem; margin: 0; position: relative; overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      margin: 0;
+      overflow-x: hidden;
+      background: linear-gradient(180deg, #87CEEB 0%, #E0F7FA 100%);
+      position: relative;
     }
+
+    /* Arcoíris animado */
     body::before {
-      content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background-image: radial-gradient(circle at 20% 30%, rgba(255,215,0,0.08) 0%, transparent 35%),
-                        radial-gradient(circle at 80% 70%, rgba(46,125,50,0.07) 0%, transparent 40%),
-                        radial-gradient(circle at 50% 90%, rgba(30,136,229,0.09) 0%, transparent 45%);
-      pointer-events: none; z-index: 0;
+      content: "";
+      position: fixed;
+      top: -60px; right: -40px;
+      width: 320px; height: 320px;
+      background: radial-gradient(circle at 30% 30%,
+        rgba(255,0,0,0.2) 0%, rgba(255,165,0,0.2) 16%, rgba(255,255,0,0.2) 32%,
+        rgba(0,128,0,0.2) 48%, rgba(0,0,255,0.2) 64%, rgba(75,0,130,0.2) 80%,
+        rgba(238,130,238,0.2) 90%, transparent 95%);
+      border-radius: 50%;
+      z-index: 0;
+      animation: rotarArcoiris 30s linear infinite;
+      pointer-events: none;
     }
+    body::after {
+      content: "";
+      position: fixed;
+      bottom: -80px; left: -60px;
+      width: 350px; height: 350px;
+      background: radial-gradient(circle at 70% 70%,
+        rgba(255,0,0,0.15) 0%, rgba(255,165,0,0.15) 16%, rgba(255,255,0,0.15) 32%,
+        rgba(0,128,0,0.15) 48%, rgba(0,0,255,0.15) 64%, rgba(75,0,130,0.15) 80%,
+        rgba(238,130,238,0.15) 90%, transparent 95%);
+      border-radius: 50%;
+      z-index: 0;
+      animation: rotarArcoiris 25s linear infinite reverse;
+      pointer-events: none;
+    }
+    @keyframes rotarArcoiris {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Nubes moviéndose */
+    .nubes {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 0; pointer-events: none; overflow: hidden;
+    }
+    .nube {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 50%;
+      box-shadow: 60px -30px 0 10px rgba(255, 255, 255, 0.7),
+                  -50px -20px 0 20px rgba(255, 255, 255, 0.7);
+      width: 100px; height: 60px;
+      filter: blur(2px);
+      animation: flotar linear infinite;
+    }
+    .nube:nth-child(1) { top: 10%; left: -150px; width: 140px; height: 70px; animation-duration: 35s; opacity: 0.6; }
+    .nube:nth-child(2) { top: 25%; left: -200px; width: 120px; height: 65px; animation-duration: 45s; opacity: 0.55; }
+    .nube:nth-child(3) { top: 50%; left: -180px; width: 160px; height: 75px; animation-duration: 40s; opacity: 0.5; }
+    .nube:nth-child(4) { top: 70%; left: -250px; width: 130px; height: 60px; animation-duration: 50s; opacity: 0.4; }
+    .nube:nth-child(5) { top: 85%; left: -120px; width: 100px; height: 50px; animation-duration: 30s; opacity: 0.45; }
+    @keyframes flotar {
+      from { transform: translateX(0); }
+      to { transform: translateX(calc(100vw + 300px)); }
+    }
+
+    /* Firma del autor */
+    .firma {
+      position: relative; z-index: 10; text-align: center;
+      margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 500;
+      color: #ffffff; background: rgba(30, 136, 229, 0.45);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      padding: 0.35rem 1.2rem; border-radius: 2rem;
+      width: fit-content; margin-left: auto; margin-right: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1); letter-spacing: 0.3px;
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+
+    /* Tarjeta del tiempo */
     .app-container {
-      width: 100%; max-width: 580px; background: rgba(255, 255, 255, 0.7);
+      width: 100%; max-width: 580px;
+      background: rgba(255, 255, 255, 0.75);
       backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-      border-radius: 2.5rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.7) inset;
-      padding: 1.8rem 1.5rem 2rem; position: relative; z-index: 2;
+      border-radius: 2.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.7) inset;
+      padding: 1.8rem 1.5rem 2rem;
+      position: relative; z-index: 5;
       border: 1px solid rgba(255,255,255,0.6);
     }
+
     h1 {
       font-size: 2rem; font-weight: 700; text-align: center; color: #0D3B66;
-      margin-bottom: 0.25rem; letter-spacing: -0.3px; display: flex; align-items: center;
-      justify-content: center; gap: 0.5rem; flex-wrap: wrap;
+      margin-bottom: 0.25rem; letter-spacing: -0.3px;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap;
     }
     h1 span {
       background: linear-gradient(135deg, #1E88E5, #43A047);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
     .flag-emoji { font-size: 2rem; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
+
     .city-selector {
-      display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;
-      margin: 1.2rem 0 1.4rem;
+      display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin: 1.2rem 0 1.4rem;
     }
     .city-btn {
       background: rgba(255,255,255,0.7); backdrop-filter: blur(6px);
@@ -66,6 +139,8 @@
       background: #1E88E5; border-color: #1E88E5; color: white;
       font-weight: 700; box-shadow: 0 10px 18px -8px rgba(30,136,229,0.5);
     }
+
+    /* Bloque principal del tiempo */
     .weather-main {
       background: rgba(255,255,255,0.55); border-radius: 2rem; padding: 1.6rem 1.5rem;
       margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.7);
@@ -78,16 +153,58 @@
       border-radius: 50%; z-index: 0;
     }
     .city-name { font-size: 1.6rem; font-weight: 700; color: #0B3B5E; position: relative; z-index: 1; }
+
+    /* Contenedor de la temperatura con los personajes a los lados */
+    .temperatura-con-personajes {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      position: relative;
+      z-index: 1;
+      margin: 0.3rem 0 0.1rem;
+    }
+
+    /* Estilos del espantapájaros (izquierda) */
+    .espantapajaros {
+      font-size: 3rem;
+      animation: balanceo 2s infinite alternate ease-in-out;
+      transform-origin: bottom center;
+      display: inline-block;
+      line-height: 1;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+    }
+
+    /* Estilos del reloj de cuco (derecha) */
+    .reloj-cuco {
+      font-size: 3rem;
+      animation: swing 1.5s infinite alternate ease-in-out;
+      transform-origin: top center;
+      display: inline-block;
+      line-height: 1;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+    }
+
+    @keyframes balanceo {
+      0% { transform: rotate(-3deg); }
+      100% { transform: rotate(5deg); }
+    }
+
+    @keyframes swing {
+      0% { transform: rotate(-5deg); }
+      100% { transform: rotate(7deg); }
+    }
+
     .current-temp {
       font-size: 4.2rem; font-weight: 800; color: #1A3B5C; line-height: 1;
-      margin: 0.3rem 0 0.1rem; position: relative; z-index: 1;
+      position: relative; z-index: 1;
     }
     .weather-desc { font-size: 1.3rem; font-weight: 600; color: #2C3E50; text-transform: capitalize; position: relative; z-index: 1; }
     .feels-like { font-size: 0.95rem; color: #546E7A; position: relative; z-index: 1; }
     .weather-icon-main { font-size: 4rem; filter: drop-shadow(0 8px 12px rgba(0,0,0,0.15)); position: relative; z-index: 1; }
+
     .details-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem;
-      margin-top: 1.2rem; position: relative; z-index: 1;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; margin-top: 1.2rem; position: relative; z-index: 1;
     }
     .detail-item {
       background: rgba(255,255,255,0.6); border-radius: 1.2rem; padding: 0.7rem 0.3rem;
@@ -95,14 +212,13 @@
     }
     .detail-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.4px; color: #78909C; font-weight: 700; }
     .detail-value { font-size: 1.2rem; font-weight: 700; color: #1E3B5A; }
+
     .hourly-title { font-weight: 700; font-size: 1rem; color: #1E3B5A; margin-bottom: 0.7rem; display: flex; align-items: center; gap: 0.4rem; }
     .hourly-scroll {
       display: flex; gap: 0.7rem; overflow-x: auto; padding-bottom: 0.7rem;
       scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
       scrollbar-width: thin; scrollbar-color: #B0C4DE transparent;
     }
-    .hourly-scroll::-webkit-scrollbar { height: 5px; }
-    .hourly-scroll::-webkit-scrollbar-thumb { background: #B0C4DE; border-radius: 10px; }
     .hourly-card {
       min-width: 70px; background: rgba(255,255,255,0.65);
       backdrop-filter: blur(8px); border-radius: 1.2rem; padding: 0.6rem 0.5rem;
@@ -114,23 +230,40 @@
     .hourly-temp { font-weight: 700; color: #1A3B5C; }
     .loading-indicator { text-align: center; color: #546E7A; font-style: italic; }
     footer { text-align: center; margin-top: 1rem; font-size: 0.7rem; color: #90A4AE; }
+
     @media (max-width: 450px) {
       .app-container { padding: 1.2rem 1rem; }
       .current-temp { font-size: 3.2rem; }
+      .espantapajaros, .reloj-cuco { font-size: 2.5rem; }
     }
   </style>
 </head>
 <body>
+
+  <!-- Nubes animadas -->
+  <div class="nubes">
+    <div class="nube"></div>
+    <div class="nube"></div>
+    <div class="nube"></div>
+    <div class="nube"></div>
+    <div class="nube"></div>
+  </div>
+
+  <!-- Firma superior -->
+  <div class="firma">App by J. Luis Seoane Lamela</div>
+
+  <!-- App del tiempo -->
   <div class="app-container">
     <h1>
-      <span class="flag-emoji">🌦️</span> Tempo en Galicia
+      <span class="flag-emoji">🌦️</span> O Tempo en Galicia
     </h1>
 
+    <!-- Botones de ciudad (Lugo aparece activo por defecto) -->
     <div class="city-selector" id="citySelector">
-      <button class="city-btn active" data-city="A Coruña">🌊 A Coruña</button>
+      <button class="city-btn" data-city="A Coruña">🌊 A Coruña</button>
       <button class="city-btn" data-city="Santiago">⛪ Santiago</button>
       <button class="city-btn" data-city="Vigo">⚓ Vigo</button>
-      <button class="city-btn" data-city="Lugo">🏰 Lugo</button>
+      <button class="city-btn active" data-city="Lugo">🏰 Lugo</button>
       <button class="city-btn" data-city="Ourense">🌡️ Ourense</button>
       <button class="city-btn" data-city="Pontevedra">🌿 Pontevedra</button>
       <button class="city-btn" data-city="Ferrol">🚢 Ferrol</button>
@@ -192,7 +325,9 @@
       const weatherMainEl = document.getElementById('weatherMain');
       const hourlyContainer = document.getElementById('hourlyContainer');
       const cityButtons = document.querySelectorAll('.city-btn');
-      let currentCity = "A Coruña";
+
+      // Ciudad por defecto: Lugo
+      let currentCity = "Lugo";
 
       function setActiveCityButton(cityName) {
         cityButtons.forEach(btn => {
@@ -233,7 +368,11 @@
         weatherMainEl.innerHTML = `
           <div class="weather-icon-main">${w.icon}</div>
           <div class="city-name">📍 ${cityName}</div>
-          <div class="current-temp">${temp}°C</div>
+          <div class="temperatura-con-personajes">
+            <span class="espantapajaros">🧑‍🌾</span>
+            <span class="current-temp">${temp}°C</span>
+            <span class="reloj-cuco">🕰️</span>
+          </div>
           <div class="weather-desc">${w.desc}</div>
           <div class="feels-like">Sensación térmica: ${feels}°C</div>
           <div class="details-grid">
@@ -289,9 +428,9 @@
         });
       });
 
+      // Cargar Lugo al iniciar
       updateWeather(currentCity);
 
-      // Registrar Service Worker para que funcione sin internet
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('./sw.js');
