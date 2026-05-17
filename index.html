@@ -15,7 +15,7 @@
     }
 
     body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -26,6 +26,9 @@
       overflow-x: hidden;
       background: linear-gradient(180deg, #87CEEB 0%, #E0F7FA 100%);
       position: relative;
+      will-change: scroll-position;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     /* Arcoíris animado */
@@ -62,10 +65,13 @@
       to { transform: rotate(360deg); }
     }
 
-    /* Nubes moviéndose */
+    /* Nubes moviéndose - optimizadas con GPU */
     .nubes {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       z-index: 0; pointer-events: none; overflow: hidden;
+      will-change: transform;
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
     }
     .nube {
       position: absolute;
@@ -76,6 +82,9 @@
       width: 100px; height: 60px;
       filter: blur(2px);
       animation: flotar linear infinite;
+      will-change: transform;
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
     }
     .nube:nth-child(1) { top: 10%; left: -150px; width: 140px; height: 70px; animation-duration: 35s; opacity: 0.6; }
     .nube:nth-child(2) { top: 25%; left: -200px; width: 120px; height: 65px; animation-duration: 45s; opacity: 0.55; }
@@ -83,11 +92,11 @@
     .nube:nth-child(4) { top: 70%; left: -250px; width: 130px; height: 60px; animation-duration: 50s; opacity: 0.4; }
     .nube:nth-child(5) { top: 85%; left: -120px; width: 100px; height: 50px; animation-duration: 30s; opacity: 0.45; }
     @keyframes flotar {
-      from { transform: translateX(0); }
-      to { transform: translateX(calc(100vw + 300px)); }
+      from { transform: translate3d(0, 0, 0); }
+      to { transform: translate3d(calc(100vw + 300px), 0, 0); }
     }
 
-    /* Firma del autor */
+    /* Firma del autor - optimizada */
     .firma {
       position: relative; z-index: 10; text-align: center;
       margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 500;
@@ -97,9 +106,11 @@
       width: fit-content; margin-left: auto; margin-right: auto;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1); letter-spacing: 0.3px;
       border: 1px solid rgba(255,255,255,0.5);
+      transform: translateZ(0);
+      will-change: auto;
     }
 
-    /* Tarjeta del tiempo */
+    /* Tarjeta del tiempo - optimizada */
     .app-container {
       width: 100%; max-width: 580px;
       background: rgba(255, 255, 255, 0.75);
@@ -109,6 +120,8 @@
       padding: 1.8rem 1.5rem 2rem;
       position: relative; z-index: 5;
       border: 1px solid rgba(255,255,255,0.6);
+      transform: translateZ(0);
+      will-change: auto;
     }
 
     h1 {
@@ -165,7 +178,7 @@
       margin: 0.3rem 0 0.1rem;
     }
 
-    /* Estilos del espantapájaros (izquierda) */
+    /* Estilos del espantapájaros (izquierda) - optimizado */
     .espantapajaros {
       font-size: 3rem;
       animation: balanceo 2s infinite alternate ease-in-out;
@@ -173,9 +186,12 @@
       display: inline-block;
       line-height: 1;
       filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+      will-change: transform;
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
     }
 
-    /* Estilos del reloj de cuco (derecha) */
+    /* Estilos del reloj de cuco (derecha) - optimizado */
     .reloj-cuco {
       font-size: 3rem;
       animation: swing 1.5s infinite alternate ease-in-out;
@@ -183,16 +199,19 @@
       display: inline-block;
       line-height: 1;
       filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+      will-change: transform;
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
     }
 
     @keyframes balanceo {
-      0% { transform: rotate(-3deg); }
-      100% { transform: rotate(5deg); }
+      0% { transform: translateZ(0) rotate(-3deg); }
+      100% { transform: translateZ(0) rotate(5deg); }
     }
 
     @keyframes swing {
-      0% { transform: rotate(-5deg); }
-      100% { transform: rotate(7deg); }
+      0% { transform: translateZ(0) rotate(-5deg); }
+      100% { transform: translateZ(0) rotate(7deg); }
     }
 
     .current-temp {
@@ -218,12 +237,17 @@
       display: flex; gap: 0.7rem; overflow-x: auto; padding-bottom: 0.7rem;
       scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
       scrollbar-width: thin; scrollbar-color: #B0C4DE transparent;
+      will-change: scroll-position;
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
     }
     .hourly-card {
       min-width: 70px; background: rgba(255,255,255,0.65);
       backdrop-filter: blur(8px); border-radius: 1.2rem; padding: 0.6rem 0.5rem;
       text-align: center; border: 1px solid rgba(255,255,255,0.7);
       flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+      transform: translateZ(0);
+      will-change: auto;
     }
     .hourly-time { font-weight: 700; font-size: 0.8rem; color: #37474F; }
     .hourly-icon { font-size: 1.6rem; margin: 0.2rem 0; }
@@ -335,17 +359,34 @@
         });
       }
 
+      // Cache para evitar llamadas repetidas a la API
+      const weatherCache = new Map();
+      const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+
       async function fetchWeather(cityName) {
+        // Verificar caché primero
+        const cached = weatherCache.get(cityName);
+        if (cached && (Date.now() - cached.timestamp) < CACHE_DURATION) {
+          return cached.data;
+        }
+
         const coords = CITIES[cityName];
         if (!coords) return null;
         const { lat, lon } = coords;
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,wind_speed_10m,wind_direction_10m,weather_code&hourly=temperature_2m,precipitation_probability,weather_code&timezone=Europe%2FMadrid&forecast_days=2`;
+        
         try {
           const r = await fetch(url);
           if (!r.ok) throw new Error('Erro na API');
-          return await r.json();
+          const data = await r.json();
+          
+          // Guardar en caché
+          weatherCache.set(cityName, { data, timestamp: Date.now() });
+          return data;
         } catch (e) {
           console.error(e);
+          // Si hay error pero tenemos datos en caché, usarlos
+          if (cached) return cached.data;
           return null;
         }
       }
@@ -391,31 +432,45 @@
         const times = hourly.time;
         const temps = hourly.temperature_2m;
         const codes = hourly.weather_code;
-        let html = '';
+        const fragment = document.createDocumentFragment();
+        const tempContainer = document.createElement('div');
         let count = 0;
+        
         for (let i = 0; i < times.length; i++) {
           const d = new Date(times[i]);
           if (d < now) continue;
           if (count >= 18) break;
+          
           const h = d.toLocaleTimeString('gl-ES', { hour:'2-digit', minute:'2-digit', hour12:false });
           const w = getWeatherInfo(codes[i]);
-          html += `<div class="hourly-card"><div class="hourly-time">${h}</div><div class="hourly-icon">${w.icon}</div><div class="hourly-temp">${Math.round(temps[i])}°</div></div>`;
+          
+          const card = document.createElement('div');
+          card.className = 'hourly-card';
+          card.innerHTML = `<div class="hourly-time">${h}</div><div class="hourly-icon">${w.icon}</div><div class="hourly-temp">${Math.round(temps[i])}°</div>`;
+          tempContainer.appendChild(card);
           count++;
         }
-        hourlyContainer.innerHTML = html || '<div class="loading-indicator">Non hai previsión horaria agora</div>';
+        
+        hourlyContainer.innerHTML = tempContainer.innerHTML || '<div class="loading-indicator">Non hai previsión horaria agora</div>';
       }
 
+      // Función debounce para evitar actualizaciones rápidas
+      let updateTimeout = null;
       async function updateWeather(city) {
-        weatherMainEl.innerHTML = '<div class="loading-indicator">✨ Cargando tempo...</div>';
-        hourlyContainer.innerHTML = '<div class="loading-indicator" style="width:100%;">Consultando previsión...</div>';
-        const data = await fetchWeather(city);
-        if (data) {
-          renderMainWeather(city, data.current);
-          renderHourly(data.hourly);
-        } else {
-          weatherMainEl.innerHTML = '<div class="loading-indicator">⚠️ Erro ao obter datos. Tenta de novo.</div>';
-          hourlyContainer.innerHTML = '<div class="loading-indicator">⚠️ Sen previsión</div>';
-        }
+        if (updateTimeout) clearTimeout(updateTimeout);
+        
+        updateTimeout = setTimeout(async () => {
+          weatherMainEl.innerHTML = '<div class="loading-indicator">✨ Cargando tempo...</div>';
+          hourlyContainer.innerHTML = '<div class="loading-indicator" style="width:100%;">Consultando previsión...</div>';
+          const data = await fetchWeather(city);
+          if (data) {
+            renderMainWeather(city, data.current);
+            renderHourly(data.hourly);
+          } else {
+            weatherMainEl.innerHTML = '<div class="loading-indicator">⚠️ Erro ao obter datos. Tenta de novo.</div>';
+            hourlyContainer.innerHTML = '<div class="loading-indicator">⚠️ Sen previsión</div>';
+          }
+        }, 50);
       }
 
       cityButtons.forEach(btn => {
