@@ -37,7 +37,7 @@
     }
     h1 {
       font-size: 2rem; font-weight: 700; text-align: center; color: #0D3B66;
-      margin-bottom: 0.25rem; letter-spacing: -0.3px; display: flex; align-items: center;
+      margin-bottom: 0.1rem; letter-spacing: -0.3px; display: flex; align-items: center;
       justify-content: center; gap: 0.5rem; flex-wrap: wrap;
     }
     h1 span {
@@ -45,6 +45,17 @@
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
     .flag-emoji { font-size: 2rem; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
+    
+    .author-credit {
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: #78909C;
+      margin-bottom: 1.2rem;
+      letter-spacing: 0.3px;
+      font-style: italic;
+      opacity: 0.85;
+    }
     
     .city-selector {
       display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;
@@ -178,6 +189,8 @@
     <h1>
       <span class="flag-emoji">🌦️</span> Tempo en Galicia
     </h1>
+    
+    <div class="author-credit">✨ José Luis Seoane Lamela (2026)</div>
 
     <div class="city-selector" id="citySelector">
       <button class="city-btn active" data-city="A Coruña">🌊 A Coruña</button>
