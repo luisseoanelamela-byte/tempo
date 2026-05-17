@@ -3,6 +3,613 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0, minimum-scale=1.0">
+  <title>Tempo en Galicia 🌦️</title>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#1E88E5">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --galicia-blue: #1E88E5; --galicia-green: #43A047; --galicia-gold: #FBC02D;
+      --galicia-sky: #B3E5FC; --galicia-sea: #0288D1; --galicia-stone: #ECEFF1;
+      --white-soft: #F5F7FA; --shadow-color: rgba(0, 20, 40, 0.12);
+      --text-dark: #1E2B3C; --text-soft: #455A64; --card-bg: rgba(255, 255, 255, 0.8);
+      --glass-border: rgba(255, 255, 255, 0.55);
+    }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(165deg, #E1F5FE 0%, #B3E5FC 20%, #F1F8E9 60%, #FFF8E1 100%);
+      background-attachment: fixed; min-height: 100vh; display: flex; align-items: center;
+      justify-content: center; padding: 1rem; margin: 0; position: relative; overflow-x: hidden;
+    }
+    body::before {
+      content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-image: radial-gradient(circle at 20% 30%, rgba(255,215,0,0.08) 0%, transparent 35%),
+                        radial-gradient(circle at 80% 70%, rgba(46,125,50,0.07) 0%, transparent 40%),
+                        radial-gradient(circle at 50% 90%, rgba(30,136,229,0.09) 0%, transparent 45%);
+      pointer-events: none; z-index: 0;
+    }
+    .app-container {
+      width: 100%; max-width: 620px; background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border-radius: 2.5rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.7) inset;
+      padding: 1.8rem 1.5rem 2rem; position: relative; z-index: 2;
+      border: 1px solid rgba(255,255,255,0.6);
+    }
+    h1 {
+      font-size: 2rem; font-weight: 700; text-align: center; color: #0D3B66;
+      margin-bottom: 0.25rem; letter-spacing: -0.3px; display: flex; align-items: center;
+      justify-content: center; gap: 0.5rem; flex-wrap: wrap;
+    }
+    h1 span {
+      background: linear-gradient(135deg, #1E88E5, #43A047);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .flag-emoji { font-size: 2rem; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
+    
+    .city-selector {
+      display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;
+      margin: 1.2rem 0 1rem;
+    }
+    .city-btn {
+      background: rgba(255,255,255,0.7); backdrop-filter: blur(6px);
+      border: 1.5px solid rgba(200,220,240,0.7); padding: 0.45rem 1rem;
+      border-radius: 2.5rem; font-weight: 600; font-size: 0.85rem; color: #1E3A5F;
+      cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .city-btn:hover {
+      background: rgba(255,255,255,0.9); border-color: #64B5F6;
+      transform: translateY(-1px); box-shadow: 0 8px 16px -6px rgba(30,136,229,0.25);
+    }
+    .city-btn.active {
+      background: #1E88E5; border-color: #1E88E5; color: white;
+      font-weight: 700; box-shadow: 0 10px 18px -8px rgba(30,136,229,0.5);
+    }
+    
+    .search-geo-row {
+      display: flex; gap: 0.6rem; margin-bottom: 1.2rem; align-items: center;
+      flex-wrap: wrap; justify-content: center;
+    }
+    .search-wrapper {
+      flex: 1 1 250px; position: relative;
+    }
+    .search-wrapper input {
+      width: 100%; padding: 0.65rem 1rem; border-radius: 2rem;
+      border: 1.5px solid rgba(200,220,240,0.8); background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(6px); font-size: 0.9rem; outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-wrapper input:focus {
+      border-color: #1E88E5; box-shadow: 0 0 0 3px rgba(30,136,229,0.15);
+    }
+    .geo-btn {
+      background: #43A047; border: none; color: white; border-radius: 2rem;
+      padding: 0.65rem 1.2rem; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 0.3rem; font-size: 0.9rem;
+      transition: background 0.2s; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      white-space: nowrap;
+    }
+    .geo-btn:hover { background: #2E7D32; }
+    .geo-btn.active-loc { background: #1E88E5; }
+    
+    .weather-main {
+      background: rgba(255,255,255,0.55); border-radius: 2rem; padding: 1.6rem 1.5rem;
+      margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.7);
+      backdrop-filter: blur(12px); box-shadow: 0 12px 28px -8px rgba(0,32,64,0.12);
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .weather-main::after {
+      content: ""; position: absolute; top: -30%; right: -20%; width: 180px; height: 180px;
+      background: radial-gradient(circle, rgba(255,235,59,0.25) 0%, transparent 70%);
+      border-radius: 50%; z-index: 0;
+    }
+    .city-name { font-size: 1.6rem; font-weight: 700; color: #0B3B5E; position: relative; z-index: 1; }
+    .current-temp {
+      font-size: 4.2rem; font-weight: 800; color: #1A3B5C; line-height: 1;
+      margin: 0.3rem 0 0.1rem; position: relative; z-index: 1;
+    }
+    .weather-desc { font-size: 1.3rem; font-weight: 600; color: #2C3E50; text-transform: capitalize; position: relative; z-index: 1; }
+    .feels-like { font-size: 0.95rem; color: #546E7A; position: relative; z-index: 1; }
+    .weather-icon-main { font-size: 4rem; filter: drop-shadow(0 8px 12px rgba(0,0,0,0.15)); position: relative; z-index: 1; }
+    .details-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem;
+      margin-top: 1.2rem; position: relative; z-index: 1;
+    }
+    .detail-item {
+      background: rgba(255,255,255,0.6); border-radius: 1.2rem; padding: 0.7rem 0.3rem;
+      text-align: center; backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.8);
+    }
+    .detail-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.4px; color: #78909C; font-weight: 700; }
+    .detail-value { font-size: 1.2rem; font-weight: 700; color: #1E3B5A; }
+    
+    .section-title {
+      font-weight: 700; font-size: 1rem; color: #1E3B5A; margin-bottom: 0.7rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    
+    .hourly-scroll {
+      display: flex; gap: 0.7rem; overflow-x: auto; padding-bottom: 0.7rem;
+      scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin; scrollbar-color: #B0C4DE transparent;
+      margin-bottom: 1.5rem;
+    }
+    .hourly-scroll::-webkit-scrollbar { height: 5px; }
+    .hourly-scroll::-webkit-scrollbar-thumb { background: #B0C4DE; border-radius: 10px; }
+    .hourly-card {
+      min-width: 70px; background: rgba(255,255,255,0.65);
+      backdrop-filter: blur(8px); border-radius: 1.2rem; padding: 0.6rem 0.5rem;
+      text-align: center; border: 1px solid rgba(255,255,255,0.7);
+      flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+    }
+    .hourly-time { font-weight: 700; font-size: 0.8rem; color: #37474F; }
+    .hourly-icon { font-size: 1.6rem; margin: 0.2rem 0; }
+    .hourly-temp { font-weight: 700; color: #1A3B5C; }
+    
+    .daily-scroll {
+      display: flex; gap: 0.8rem; overflow-x: auto; padding-bottom: 0.7rem;
+      scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin; scrollbar-color: #B0C4DE transparent;
+      margin-bottom: 1rem;
+    }
+    .daily-scroll::-webkit-scrollbar { height: 5px; }
+    .daily-scroll::-webkit-scrollbar-thumb { background: #B0C4DE; border-radius: 10px; }
+    .daily-card {
+      min-width: 110px; background: rgba(255,255,255,0.65);
+      backdrop-filter: blur(8px); border-radius: 1.5rem; padding: 0.9rem 0.6rem;
+      text-align: center; border: 1px solid rgba(255,255,255,0.7);
+      flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    }
+    .daily-day { font-weight: 700; font-size: 0.85rem; color: #0B3B5E; }
+    .daily-icon { font-size: 2rem; margin: 0.3rem 0; }
+    .daily-temp { font-weight: 700; font-size: 1rem; color: #1A3B5C; }
+    .daily-desc { font-size: 0.7rem; color: #546E7A; text-transform: capitalize; margin-top: 0.2rem; }
+    
+    .loading-indicator { text-align: center; color: #546E7A; font-style: italic; padding: 1rem; }
+    footer { text-align: center; margin-top: 1rem; font-size: 0.7rem; color: #90A4AE; }
+    
+    @media (max-width: 450px) {
+      .app-container { padding: 1.2rem 1rem; }
+      .current-temp { font-size: 3.2rem; }
+      .daily-card { min-width: 95px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <h1>
+      <span class="flag-emoji">🌦️</span> Tempo en Galicia
+    </h1>
+
+    <div class="city-selector" id="citySelector">
+      <button class="city-btn active" data-city="A Coruña">🌊 A Coruña</button>
+      <button class="city-btn" data-city="Santiago">⛪ Santiago</button>
+      <button class="city-btn" data-city="Vigo">⚓ Vigo</button>
+      <button class="city-btn" data-city="Lugo">🏰 Lugo</button>
+      <button class="city-btn" data-city="Ourense">🌡️ Ourense</button>
+      <button class="city-btn" data-city="Pontevedra">🌿 Pontevedra</button>
+      <button class="city-btn" data-city="Ferrol">🚢 Ferrol</button>
+    </div>
+
+    <div class="search-geo-row">
+      <div class="search-wrapper">
+        <input type="text" id="concelloSearch" placeholder="🔍 Buscar concello..." list="concelloList" autocomplete="off">
+        <datalist id="concelloList"></datalist>
+      </div>
+      <button class="geo-btn" id="geolocateBtn">📍 Miña localización</button>
+    </div>
+
+    <div class="weather-main" id="weatherMain">
+      <div class="loading-indicator">✨ Cargando tempo...</div>
+    </div>
+
+    <div>
+      <div class="section-title">⏳ Próximas horas</div>
+      <div class="hourly-scroll" id="hourlyContainer">
+        <div class="loading-indicator">Consultando previsión...</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">📅 Previsión 5 días</div>
+      <div class="daily-scroll" id="dailyContainer">
+        <div class="loading-indicator">Cargando días...</div>
+      </div>
+    </div>
+
+    <footer>✨ Datos de Open-Meteo · Galicia sempre verde</footer>
+  </div>
+
+  <script>
+    (function() {
+      const CONCELLOS = [
+        {"nome":"Abadín","lat":43.37,"lon":-7.48},{"nome":"Abegondo","lat":43.23,"lon":-8.28},
+        {"nome":"Agolada","lat":42.76,"lon":-8.02},{"nome":"Alfoz","lat":43.53,"lon":-7.41},
+        {"nome":"Allariz","lat":42.19,"lon":-7.80},{"nome":"Ames","lat":42.89,"lon":-8.64},
+        {"nome":"Amoeiro","lat":42.41,"lon":-7.95},{"nome":"Antas de Ulla","lat":42.78,"lon":-7.89},
+        {"nome":"Aranga","lat":43.23,"lon":-8.01},{"nome":"Ares","lat":43.43,"lon":-8.24},
+        {"nome":"Arnoia","lat":42.25,"lon":-8.13},{"nome":"Arzúa","lat":42.93,"lon":-8.16},
+        {"nome":"Avión","lat":42.37,"lon":-8.25},{"nome":"Baiona","lat":42.12,"lon":-8.85},
+        {"nome":"Baleira","lat":43.00,"lon":-7.24},{"nome":"Baltar","lat":41.95,"lon":-7.71},
+        {"nome":"Bande","lat":42.03,"lon":-7.98},{"nome":"Baña (A)","lat":42.96,"lon":-8.76},
+        {"nome":"Baños de Molgas","lat":42.24,"lon":-7.67},{"nome":"Baralla","lat":42.89,"lon":-7.25},
+        {"nome":"Barbadás","lat":42.30,"lon":-7.89},{"nome":"Barco de Valdeorras (O)","lat":42.42,"lon":-6.99},
+        {"nome":"Barreiros","lat":43.58,"lon":-7.24},{"nome":"Barro","lat":42.53,"lon":-8.64},
+        {"nome":"Beade","lat":42.33,"lon":-8.13},{"nome":"Beariz","lat":42.47,"lon":-8.27},
+        {"nome":"Becerreá","lat":42.85,"lon":-7.16},{"nome":"Begonte","lat":43.15,"lon":-7.69},
+        {"nome":"Bergondo","lat":43.32,"lon":-8.23},{"nome":"Betanzos","lat":43.28,"lon":-8.21},
+        {"nome":"Bóveda","lat":42.62,"lon":-7.48},{"nome":"Boimorto","lat":43.00,"lon":-8.13},
+        {"nome":"Boiro","lat":42.65,"lon":-8.90},{"nome":"Boqueixón","lat":42.81,"lon":-8.41},
+        {"nome":"Bola (A)","lat":42.15,"lon":-7.91},{"nome":"Bolo (O)","lat":42.29,"lon":-7.10},
+        {"nome":"Bueu","lat":42.33,"lon":-8.79},{"nome":"Burela","lat":43.66,"lon":-7.36},
+        {"nome":"Cabana de Bergantiños","lat":43.22,"lon":-8.94},{"nome":"Cabanas","lat":43.42,"lon":-8.16},
+        {"nome":"Caldas de Reis","lat":42.60,"lon":-8.64},{"nome":"Calvos de Randín","lat":41.94,"lon":-7.90},
+        {"nome":"Camariñas","lat":43.13,"lon":-9.18},{"nome":"Cambados","lat":42.51,"lon":-8.81},
+        {"nome":"Cambre","lat":43.29,"lon":-8.34},{"nome":"Campo Lameiro","lat":42.54,"lon":-8.54},
+        {"nome":"Cangas","lat":42.26,"lon":-8.78},{"nome":"Cañiza (A)","lat":42.21,"lon":-8.27},
+        {"nome":"Capela (A)","lat":43.44,"lon":-8.07},{"nome":"Carballeda de Avia","lat":42.33,"lon":-8.16},
+        {"nome":"Carballeda de Valdeorras","lat":42.37,"lon":-6.88},{"nome":"Carballiño (O)","lat":42.43,"lon":-8.08},
+        {"nome":"Carballo","lat":43.21,"lon":-8.69},{"nome":"Cariño","lat":43.74,"lon":-7.87},
+        {"nome":"Carnota","lat":42.82,"lon":-9.09},{"nome":"Carral","lat":43.23,"lon":-8.36},
+        {"nome":"Cartelle","lat":42.25,"lon":-8.07},{"nome":"Castrelo de Miño","lat":42.28,"lon":-8.10},
+        {"nome":"Castrelo do Val","lat":41.99,"lon":-7.42},{"nome":"Castro Caldelas","lat":42.38,"lon":-7.42},
+        {"nome":"Castro de Rei","lat":43.21,"lon":-7.40},{"nome":"Castroverde","lat":43.03,"lon":-7.32},
+        {"nome":"Catoira","lat":42.67,"lon":-8.72},{"nome":"Cedeira","lat":43.66,"lon":-8.06},
+        {"nome":"Cee","lat":42.95,"lon":-9.19},{"nome":"Celanova","lat":42.15,"lon":-7.96},
+        {"nome":"Cenlle","lat":42.34,"lon":-8.09},{"nome":"Cerceda","lat":43.19,"lon":-8.47},
+        {"nome":"Cerdedo-Cotobade","lat":42.53,"lon":-8.39},{"nome":"Cerdido","lat":43.61,"lon":-7.99},
+        {"nome":"Cervantes","lat":42.87,"lon":-7.04},{"nome":"Cervo","lat":43.69,"lon":-7.41},
+        {"nome":"Chandrexa de Queixa","lat":42.26,"lon":-7.38},{"nome":"Chantada","lat":42.61,"lon":-7.77},
+        {"nome":"Coirós","lat":43.25,"lon":-8.16},{"nome":"Coles","lat":42.40,"lon":-7.84},
+        {"nome":"Corcubión","lat":42.94,"lon":-9.19},{"nome":"Corgo (O)","lat":42.94,"lon":-7.43},
+        {"nome":"Coristanco","lat":43.19,"lon":-8.76},{"nome":"Cortegada","lat":42.21,"lon":-8.17},
+        {"nome":"Coruña (A)","lat":43.36,"lon":-8.41},{"nome":"Covelo","lat":42.23,"lon":-8.35},
+        {"nome":"Crecente","lat":42.15,"lon":-8.22},{"nome":"Culleredo","lat":43.29,"lon":-8.39},
+        {"nome":"Cuntis","lat":42.63,"lon":-8.56},{"nome":"Dodro","lat":42.71,"lon":-8.68},
+        {"nome":"Dozón","lat":42.58,"lon":-8.02},{"nome":"Dumbría","lat":43.01,"lon":-9.12},
+        {"nome":"Entrimo","lat":41.93,"lon":-8.12},{"nome":"Esgos","lat":42.32,"lon":-7.70},
+        {"nome":"Estrada (A)","lat":42.69,"lon":-8.49},{"nome":"Fene","lat":43.47,"lon":-8.16},
+        {"nome":"Ferrol","lat":43.48,"lon":-8.23},{"nome":"Fisterra","lat":42.91,"lon":-9.26},
+        {"nome":"Folgoso do Courel","lat":42.59,"lon":-7.19},{"nome":"Fonsagrada (A)","lat":43.13,"lon":-7.07},
+        {"nome":"Forcarei","lat":42.59,"lon":-8.35},{"nome":"Fornelos de Montes","lat":42.32,"lon":-8.45},
+        {"nome":"Foz","lat":43.57,"lon":-7.26},{"nome":"Frades","lat":43.05,"lon":-8.28},
+        {"nome":"Friol","lat":43.03,"lon":-7.79},{"nome":"Gomesende","lat":42.19,"lon":-8.10},
+        {"nome":"Gondomar","lat":42.11,"lon":-8.76},{"nome":"Grove (O)","lat":42.49,"lon":-8.86},
+        {"nome":"Guarda (A)","lat":41.90,"lon":-8.87},{"nome":"Guitiriz","lat":43.18,"lon":-7.90},
+        {"nome":"Guntín","lat":42.89,"lon":-7.69},{"nome":"Illa de Arousa (A)","lat":42.55,"lon":-8.87},
+        {"nome":"Incio (O)","lat":42.64,"lon":-7.36},{"nome":"Irixo (O)","lat":42.51,"lon":-8.12},
+        {"nome":"Irixoa","lat":43.28,"lon":-8.06},{"nome":"Lalín","lat":42.66,"lon":-8.11},
+        {"nome":"Lama (A)","lat":42.39,"lon":-8.44},{"nome":"Láncara","lat":42.86,"lon":-7.34},
+        {"nome":"Laracha (A)","lat":43.25,"lon":-8.58},{"nome":"Larouco","lat":42.35,"lon":-7.16},
+        {"nome":"Laxe","lat":43.22,"lon":-9.01},{"nome":"Leiro","lat":42.37,"lon":-8.13},
+        {"nome":"Lobeira","lat":41.99,"lon":-8.04},{"nome":"Lobios","lat":41.90,"lon":-8.08},
+        {"nome":"Lourenzá","lat":43.47,"lon":-7.30},{"nome":"Lousame","lat":42.76,"lon":-8.83},
+        {"nome":"Lugo","lat":43.01,"lon":-7.56},{"nome":"Maceda","lat":42.27,"lon":-7.65},
+        {"nome":"Malpica de Bergantiños","lat":43.32,"lon":-8.81},{"nome":"Manzaneda","lat":42.31,"lon":-7.23},
+        {"nome":"Marín","lat":42.39,"lon":-8.70},{"nome":"Maside","lat":42.41,"lon":-8.02},
+        {"nome":"Mazaricos","lat":42.94,"lon":-8.99},{"nome":"Meaño","lat":42.45,"lon":-8.78},
+        {"nome":"Meira","lat":43.21,"lon":-7.29},{"nome":"Meis","lat":42.50,"lon":-8.72},
+        {"nome":"Melide","lat":42.91,"lon":-8.01},{"nome":"Melón","lat":42.26,"lon":-8.21},
+        {"nome":"Merca (A)","lat":42.22,"lon":-7.91},{"nome":"Mesía","lat":43.10,"lon":-8.27},
+        {"nome":"Miño","lat":43.35,"lon":-8.20},{"nome":"Moaña","lat":42.28,"lon":-8.75},
+        {"nome":"Moeche","lat":43.56,"lon":-8.01},{"nome":"Mondariz","lat":42.23,"lon":-8.45},
+        {"nome":"Mondariz-Balneario","lat":42.22,"lon":-8.47},{"nome":"Mondoñedo","lat":43.43,"lon":-7.36},
+        {"nome":"Monfero","lat":43.34,"lon":-8.02},{"nome":"Monforte de Lemos","lat":42.52,"lon":-7.51},
+        {"nome":"Montederramo","lat":42.28,"lon":-7.50},{"nome":"Monterrei","lat":41.95,"lon":-7.56},
+        {"nome":"Monterroso","lat":42.79,"lon":-7.83},{"nome":"Moraña","lat":42.55,"lon":-8.56},
+        {"nome":"Mos","lat":42.21,"lon":-8.62},{"nome":"Mugardos","lat":43.46,"lon":-8.25},
+        {"nome":"Muíños","lat":41.95,"lon":-7.99},{"nome":"Muras","lat":43.47,"lon":-7.72},
+        {"nome":"Muxía","lat":43.10,"lon":-9.22},{"nome":"Narón","lat":43.54,"lon":-8.15},
+        {"nome":"Naval de Suarna","lat":42.93,"lon":-7.01},{"nome":"Neda","lat":43.50,"lon":-8.15},
+        {"nome":"Negreira","lat":42.91,"lon":-8.74},{"nome":"Negueira de Muñiz","lat":43.13,"lon":-6.90},
+        {"nome":"Neves (As)","lat":42.09,"lon":-8.41},{"nome":"Nigrán","lat":42.14,"lon":-8.80},
+        {"nome":"Noia","lat":42.79,"lon":-8.89},{"nome":"Oia","lat":42.00,"lon":-8.87},
+        {"nome":"Oleiros","lat":43.36,"lon":-8.33},{"nome":"Ordes","lat":43.08,"lon":-8.41},
+        {"nome":"Oroso","lat":42.98,"lon":-8.44},{"nome":"Ortigueira","lat":43.68,"lon":-7.85},
+        {"nome":"Ourense","lat":42.34,"lon":-7.86},{"nome":"Ourol","lat":43.56,"lon":-7.64},
+        {"nome":"Outeiro de Rei","lat":43.10,"lon":-7.61},{"nome":"Oza-Cesuras","lat":43.20,"lon":-8.16},
+        {"nome":"Paderne","lat":43.29,"lon":-8.17},{"nome":"Paderne de Allariz","lat":42.28,"lon":-7.75},
+        {"nome":"Padrenda","lat":42.13,"lon":-8.16},{"nome":"Padrón","lat":42.74,"lon":-8.66},
+        {"nome":"Palas de Rei","lat":42.87,"lon":-7.87},{"nome":"Pantón","lat":42.51,"lon":-7.64},
+        {"nome":"Parada de Sil","lat":42.38,"lon":-7.57},{"nome":"Paradela","lat":42.75,"lon":-7.61},
+        {"nome":"Páramo (O)","lat":42.83,"lon":-7.53},{"nome":"Pastoriza (A)","lat":43.30,"lon":-7.33},
+        {"nome":"Pazos de Borbén","lat":42.29,"lon":-8.53},{"nome":"Pedrafita do Cebreiro","lat":42.73,"lon":-7.02},
+        {"nome":"Pereiro de Aguiar (O)","lat":42.35,"lon":-7.80},{"nome":"Peroxa (A)","lat":42.44,"lon":-7.79},
+        {"nome":"Petín","lat":42.38,"lon":-7.12},{"nome":"Pino (O)","lat":42.94,"lon":-8.33},
+        {"nome":"Piñor","lat":42.50,"lon":-8.01},{"nome":"Poio","lat":42.45,"lon":-8.68},
+        {"nome":"Pol","lat":43.15,"lon":-7.33},{"nome":"Ponte Caldelas","lat":42.39,"lon":-8.50},
+        {"nome":"Ponteareas","lat":42.17,"lon":-8.50},{"nome":"Ponteceso","lat":43.24,"lon":-8.90},
+        {"nome":"Pontecesures","lat":42.72,"lon":-8.65},{"nome":"Pontedeume","lat":43.41,"lon":-8.17},
+        {"nome":"Pontedeva","lat":42.17,"lon":-8.14},{"nome":"Pontenova (A)","lat":43.35,"lon":-7.19},
+        {"nome":"Pontevedra","lat":42.43,"lon":-8.64},{"nome":"Porqueira","lat":42.02,"lon":-7.84},
+        {"nome":"Porriño (O)","lat":42.16,"lon":-8.62},{"nome":"Portas","lat":42.58,"lon":-8.66},
+        {"nome":"Porto do Son","lat":42.73,"lon":-9.00},{"nome":"Pobra de Trives (A)","lat":42.34,"lon":-7.25},
+        {"nome":"Pobra do Brollón (A)","lat":42.56,"lon":-7.39},{"nome":"Pobra do Caramiñal (A)","lat":42.60,"lon":-8.94},
+        {"nome":"Punxín","lat":42.37,"lon":-8.00},{"nome":"Quintela de Leirado","lat":42.14,"lon":-8.10},
+        {"nome":"Quiroga","lat":42.49,"lon":-7.27},{"nome":"Rairiz de Veiga","lat":42.08,"lon":-7.83},
+        {"nome":"Ramirás","lat":42.18,"lon":-8.03},{"nome":"Redondela","lat":42.28,"lon":-8.61},
+        {"nome":"Rianxo","lat":42.65,"lon":-8.82},{"nome":"Ribadavia","lat":42.29,"lon":-8.14},
+        {"nome":"Ribadeo","lat":43.54,"lon":-7.04},{"nome":"Ribadumia","lat":42.51,"lon":-8.76},
+        {"nome":"Ribas de Sil","lat":42.46,"lon":-7.30},{"nome":"Ribeira","lat":42.55,"lon":-9.00},
+        {"nome":"Ribeira de Piquín","lat":43.19,"lon":-7.19},{"nome":"Riotorto","lat":43.33,"lon":-7.26},
+        {"nome":"Rodeiro","lat":42.65,"lon":-7.95},{"nome":"Rois","lat":42.76,"lon":-8.69},
+        {"nome":"Rosal (O)","lat":41.93,"lon":-8.83},{"nome":"Rúa (A)","lat":42.39,"lon":-7.11},
+        {"nome":"Rubiá","lat":42.46,"lon":-6.97},{"nome":"Sada","lat":43.36,"lon":-8.25},
+        {"nome":"Salceda de Caselas","lat":42.10,"lon":-8.56},{"nome":"Salvaterra de Miño","lat":42.08,"lon":-8.49},
+        {"nome":"Samos","lat":42.73,"lon":-7.31},{"nome":"San Cibrao das Viñas","lat":42.30,"lon":-7.88},
+        {"nome":"San Cristovo de Cea","lat":42.47,"lon":-7.99},{"nome":"San Sadurniño","lat":43.56,"lon":-8.07},
+        {"nome":"San Xoán de Río","lat":42.37,"lon":-7.30},{"nome":"Sandiás","lat":42.11,"lon":-7.76},
+        {"nome":"Santa Comba","lat":43.04,"lon":-8.81},{"nome":"Santiago de Compostela","lat":42.88,"lon":-8.54},
+        {"nome":"Santiso","lat":42.85,"lon":-8.06},{"nome":"Sanxenxo","lat":42.40,"lon":-8.80},
+        {"nome":"Sarreaus","lat":42.09,"lon":-7.60},{"nome":"Sarria","lat":42.78,"lon":-7.42},
+        {"nome":"Silleda","lat":42.70,"lon":-8.25},{"nome":"Sober","lat":42.46,"lon":-7.59},
+        {"nome":"Somozas (As)","lat":43.53,"lon":-7.93},{"nome":"Taboada","lat":42.72,"lon":-7.76},
+        {"nome":"Taboadela","lat":42.24,"lon":-7.83},{"nome":"Teixeira (A)","lat":42.39,"lon":-7.49},
+        {"nome":"Teo","lat":42.79,"lon":-8.56},{"nome":"Tomiño","lat":41.99,"lon":-8.73},
+        {"nome":"Toques","lat":42.99,"lon":-8.01},{"nome":"Tordoia","lat":43.09,"lon":-8.56},
+        {"nome":"Touro","lat":42.87,"lon":-8.30},{"nome":"Trazo","lat":43.02,"lon":-8.52},
+        {"nome":"Triacastela","lat":42.77,"lon":-7.23},{"nome":"Tui","lat":42.05,"lon":-8.64},
+        {"nome":"Val do Dubra","lat":43.02,"lon":-8.64},{"nome":"Valadouro (O)","lat":43.56,"lon":-7.46},
+        {"nome":"Valdoviño","lat":43.60,"lon":-8.15},{"nome":"Valga","lat":42.69,"lon":-8.64},
+        {"nome":"Vedra","lat":42.78,"lon":-8.47},{"nome":"Verea","lat":42.10,"lon":-7.95},
+        {"nome":"Verín","lat":41.94,"lon":-7.44},{"nome":"Viana do Bolo","lat":42.18,"lon":-7.11},
+        {"nome":"Vicedo (O)","lat":43.73,"lon":-7.66},{"nome":"Vigo","lat":42.24,"lon":-8.72},
+        {"nome":"Vila de Cruces","lat":42.80,"lon":-8.17},{"nome":"Vilaboa","lat":42.36,"lon":-8.63},
+        {"nome":"Vilagarcía de Arousa","lat":42.60,"lon":-8.77},{"nome":"Vilalba","lat":43.30,"lon":-7.68},
+        {"nome":"Vilamarín","lat":42.45,"lon":-7.89},{"nome":"Vilamartín de Valdeorras","lat":42.42,"lon":-7.06},
+        {"nome":"Vilanova de Arousa","lat":42.56,"lon":-8.83},{"nome":"Vilar de Barrio","lat":42.16,"lon":-7.61},
+        {"nome":"Vilar de Santos","lat":42.09,"lon":-7.79},{"nome":"Vilardevós","lat":41.94,"lon":-7.31},
+        {"nome":"Vilariño de Conso","lat":42.17,"lon":-7.18},{"nome":"Vilarmaior","lat":43.34,"lon":-8.13},
+        {"nome":"Vilasantar","lat":43.07,"lon":-8.10},{"nome":"Vimianzo","lat":43.11,"lon":-9.03},
+        {"nome":"Viveiro","lat":43.66,"lon":-7.59},{"nome":"Xermade","lat":43.35,"lon":-7.80},
+        {"nome":"Xinzo de Limia","lat":42.06,"lon":-7.72},{"nome":"Xunqueira de Ambía","lat":42.20,"lon":-7.73},
+        {"nome":"Xunqueira de Espadanedo","lat":42.32,"lon":-7.63},{"nome":"Zas","lat":43.10,"lon":-8.92}
+      ];
+
+      const concelloMap = {};
+      CONCELLOS.forEach(c => { concelloMap[c.nome] = c; });
+
+      const WMO_MAP = {
+        0:  { desc: "Despexado", icon: "☀️" },
+        1:  { desc: "Maiormente despexado", icon: "🌤️" },
+        2:  { desc: "Parcialmente nubrado", icon: "⛅" },
+        3:  { desc: "Nubrado", icon: "☁️" },
+        45: { desc: "Néboa", icon: "🌫️" },
+        48: { desc: "Néboa xeada", icon: "🌫️❄️" },
+        51: { desc: "Orballo lixeiro", icon: "🌦️" },
+        53: { desc: "Orballo moderado", icon: "🌦️" },
+        55: { desc: "Orballo intenso", icon: "🌧️" },
+        61: { desc: "Chuvia feble", icon: "🌧️" },
+        63: { desc: "Chuvia moderada", icon: "🌧️" },
+        65: { desc: "Chuvia forte", icon: "🌧️⛈️" },
+        71: { desc: "Neve feble", icon: "❄️" },
+        73: { desc: "Neve moderada", icon: "❄️" },
+        75: { desc: "Neve intensa", icon: "❄️🌨️" },
+        80: { desc: "Chuvascos", icon: "🌦️" },
+        81: { desc: "Chuvascos moderados", icon: "🌧️" },
+        82: { desc: "Chuvascos fortes", icon: "⛈️" },
+        95: { desc: "Treboada", icon: "⛈️" },
+        96: { desc: "Treboada con sarabia", icon: "⛈️🧊" },
+        99: { desc: "Treboada forte", icon: "⛈️⚡" }
+      };
+
+      function getWeatherInfo(code) {
+        return WMO_MAP[code] || { desc: "Variable", icon: "🌤️" };
+      }
+
+      const weatherMainEl = document.getElementById('weatherMain');
+      const hourlyContainer = document.getElementById('hourlyContainer');
+      const dailyContainer = document.getElementById('dailyContainer');
+      const cityButtons = document.querySelectorAll('.city-btn');
+      const concelloInput = document.getElementById('concelloSearch');
+      const datalist = document.getElementById('concelloList');
+      const geolocateBtn = document.getElementById('geolocateBtn');
+
+      let currentCity = "A Coruña";
+      let currentCoords = { lat: 43.3623, lon: -8.4115 };
+      let usingGeolocation = false;
+
+      CONCELLOS.forEach(c => {
+        const option = document.createElement('option');
+        option.value = c.nome;
+        datalist.appendChild(option);
+      });
+
+      function setActiveCityButton(cityName) {
+        cityButtons.forEach(btn => btn.classList.remove('active'));
+        geolocateBtn.classList.remove('active-loc');
+        usingGeolocation = false;
+        const btn = Array.from(cityButtons).find(b => b.dataset.city === cityName);
+        if (btn) btn.classList.add('active');
+        else cityButtons.forEach(b => b.classList.remove('active'));
+        concelloInput.value = cityName;
+      }
+
+      function setActiveGeolocation() {
+        cityButtons.forEach(b => b.classList.remove('active'));
+        geolocateBtn.classList.add('active-loc');
+        usingGeolocation = true;
+        concelloInput.value = '';
+      }
+
+      async function fetchWeather(lat, lon) {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+          `&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,wind_speed_10m,wind_direction_10m,weather_code` +
+          `&hourly=temperature_2m,precipitation_probability,weather_code` +
+          `&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_sum` +
+          `&timezone=Europe%2FMadrid&forecast_days=5`;
+        try {
+          const r = await fetch(url);
+          if (!r.ok) throw new Error('Erro na API');
+          return await r.json();
+        } catch (e) {
+          console.error(e);
+          return null;
+        }
+      }
+
+      function renderMainWeather(cityName, current) {
+        if (!current) {
+          weatherMainEl.innerHTML = '<div class="loading-indicator">⚠️ Non se puido cargar o tempo</div>';
+          return;
+        }
+        const w = getWeatherInfo(current.weather_code);
+        const temp = Math.round(current.temperature_2m);
+        const feels = Math.round(current.apparent_temperature);
+        const hum = current.relative_humidity_2m;
+        const wind = current.wind_speed_10m;
+        const dir = current.wind_direction_10m;
+        const precip = current.precipitation;
+        const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSO','SO','OSO','O','ONO','NO','NNO'];
+        const windText = dirs[Math.round(dir / 22.5) % 16] || '';
+
+        weatherMainEl.innerHTML = `
+          <div class="weather-icon-main">${w.icon}</div>
+          <div class="city-name">📍 ${cityName}</div>
+          <div class="current-temp">${temp}°C</div>
+          <div class="weather-desc">${w.desc}</div>
+          <div class="feels-like">Sensación térmica: ${feels}°C</div>
+          <div class="details-grid">
+            <div class="detail-item"><div class="detail-label">💧 Humidade</div><div class="detail-value">${hum}%</div></div>
+            <div class="detail-item"><div class="detail-label">🌬️ Vento</div><div class="detail-value">${wind} km/h ${windText}</div></div>
+            <div class="detail-item"><div class="detail-label">☔ Precipitación</div><div class="detail-value">${precip} mm</div></div>
+          </div>`;
+      }
+
+      function renderHourly(hourly) {
+        if (!hourly || !hourly.time || hourly.time.length === 0) {
+          hourlyContainer.innerHTML = '<div class="loading-indicator">Sen datos horarios</div>';
+          return;
+        }
+        const now = new Date();
+        const times = hourly.time;
+        const temps = hourly.temperature_2m;
+        const codes = hourly.weather_code;
+        let html = '';
+        let count = 0;
+        for (let i = 0; i < times.length; i++) {
+          const d = new Date(times[i]);
+          if (d < now) continue;
+          if (count >= 18) break;
+          const h = d.toLocaleTimeString('gl-ES', { hour:'2-digit', minute:'2-digit', hour12:false });
+          const w = getWeatherInfo(codes[i]);
+          html += `<div class="hourly-card"><div class="hourly-time">${h}</div><div class="hourly-icon">${w.icon}</div><div class="hourly-temp">${Math.round(temps[i])}°</div></div>`;
+          count++;
+        }
+        hourlyContainer.innerHTML = html || '<div class="loading-indicator">Non hai previsión horaria</div>';
+      }
+
+      function renderDaily(daily) {
+        if (!daily || !daily.time || daily.time.length === 0) {
+          dailyContainer.innerHTML = '<div class="loading-indicator">Sen previsión diaria</div>';
+          return;
+        }
+        const days = ['Dom','Lun','Mar','Mér','Xov','Ven','Sáb'];
+        let html = '';
+        for (let i = 0; i < daily.time.length; i++) {
+          const d = new Date(daily.time[i] + 'T00:00:00');
+          const dayName = days[d.getUTCDay()];
+          const dateStr = d.toLocaleDateString('gl-ES', { day:'numeric', month:'numeric' });
+          const w = getWeatherInfo(daily.weather_code[i]);
+          const max = Math.round(daily.temperature_2m_max[i]);
+          const min = Math.round(daily.temperature_2m_min[i]);
+          html += `<div class="daily-card">
+            <div class="daily-day">${dayName} ${dateStr}</div>
+            <div class="daily-icon">${w.icon}</div>
+            <div class="daily-temp">${max}° / ${min}°</div>
+            <div class="daily-desc">${w.desc}</div>
+          </div>`;
+        }
+        dailyContainer.innerHTML = html;
+      }
+
+      async function updateWeather(cityName, lat, lon) {
+        weatherMainEl.innerHTML = '<div class="loading-indicator">✨ Cargando tempo...</div>';
+        hourlyContainer.innerHTML = '<div class="loading-indicator">Consultando previsión...</div>';
+        dailyContainer.innerHTML = '<div class="loading-indicator">Cargando días...</div>';
+        const data = await fetchWeather(lat, lon);
+        if (data) {
+          renderMainWeather(cityName, data.current);
+          renderHourly(data.hourly);
+          renderDaily(data.daily);
+        } else {
+          weatherMainEl.innerHTML = '<div class="loading-indicator">⚠️ Erro ao obter datos. Tenta de novo.</div>';
+          hourlyContainer.innerHTML = '';
+          dailyContainer.innerHTML = '';
+        }
+      }
+
+      function handleCitySelection(cityName, lat, lon) {
+        currentCity = cityName;
+        currentCoords = { lat, lon };
+        setActiveCityButton(cityName);
+        updateWeather(cityName, lat, lon);
+      }
+
+      cityButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+          const city = this.getAttribute('data-city');
+          const coords = concelloMap[city] || { lat: 43.36, lon: -8.41 };
+          handleCitySelection(city, coords.lat, coords.lon);
+        });
+      });
+
+      concelloInput.addEventListener('input', function() {
+        const val = this.value.trim();
+        if (concelloMap[val]) {
+          const c = concelloMap[val];
+          handleCitySelection(val, c.lat, c.lon);
+        }
+      });
+
+      geolocateBtn.addEventListener('click', () => {
+        if (!navigator.geolocation) {
+          alert('A xeolocalización non está dispoñible no teu navegador.');
+          return;
+        }
+        geolocateBtn.textContent = '⏳ Obtendo...';
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            let closest = null;
+            let minDist = Infinity;
+            CONCELLOS.forEach(c => {
+              const d = Math.hypot(c.lat - lat, c.lon - lon);
+              if (d < minDist) {
+                minDist = d;
+                closest = c;
+              }
+            });
+            const cityName = closest ? closest.nome : 'A túa ubicación';
+            currentCity = cityName;
+            currentCoords = { lat, lon };
+            setActiveGeolocation();
+            updateWeather(cityName, lat, lon);
+            geolocateBtn.textContent = '📍 Miña localización';
+          },
+          (err) => {
+            alert('Non se puido obter a localización. Permite o acceso ou escolle un concello.');
+            geolocateBtn.textContent = '📍 Miña localización';
+            console.error(err);
+          },
+          { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 }
+        );
+      });
+
+      updateWeather(currentCity, currentCoords.lat, currentCoords.lon);
+
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js');
+        });
+      }
+    })();
+  </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="gl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0, minimum-scale=1.0">
   <title>O Tempo en Galicia 🌦️</title>
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#1E88E5">
